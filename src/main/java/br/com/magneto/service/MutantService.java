@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 public class MutantService {
 
     public boolean isMutant(String[] dna){
-        boolean isMutant = false;
         final int n = dna.length;
 
         String [][] matrix = this.getCharMatrix(dna, n);
@@ -20,8 +19,12 @@ public class MutantService {
         int resultPriDiagonal = this.findSequenceInPrimaryDiagonal(matrix,n);
         if(resultPriDiagonal + resultHorizontalTest + resultVerticalTest >= 2) return  true;
 
+        int resultSecDiagonal = this.findSequenceInSecondaryDiagonal(matrix,n);
+        if(resultSecDiagonal + resultPriDiagonal + resultHorizontalTest + resultVerticalTest >= 2) return  true;
 
-        return isMutant;
+        //TODO save dna in mongodb
+
+        return false;
     }
 
     private String [][] getCharMatrix(String[] dna, int n) {
@@ -111,23 +114,21 @@ public class MutantService {
 
     private int findSequenceInSecondaryDiagonal(String [][] matrix, int n){
         int totalOcurrences = 0;
-        for(int j = 0; j<n; j++){
-            String lastStr = "", fixedStr = "";
-            int totalSequence = 1;
-            for(int i = 0; i<n; i++){
-                if(lastStr.equals(matrix[i][j])){
-                    if(totalSequence == 1) fixedStr = matrix[i][j];
-                    if(lastStr.equals(fixedStr)) {
-                        totalSequence++;
-                        if (totalSequence >= 4) {
-                            totalOcurrences++;
-                        }
-                    }else{
-                        totalSequence = 1;
+        String lastStr = "", fixedStr = "";
+        int totalSequence = 1;
+        for(int i = 0, j = n-1; i<n; i++ , j--){
+            if(lastStr.equals(matrix[i][j])){
+                if(totalSequence == 1) fixedStr = matrix[i][j];
+                if(lastStr.equals(fixedStr)) {
+                    totalSequence++;
+                    if (totalSequence >= 4) {
+                        totalOcurrences++;
                     }
+                }else{
+                    totalSequence = 1;
                 }
-                lastStr = matrix[i][j];
             }
+            lastStr = matrix[i][j];
         }
         return totalOcurrences;
     }
