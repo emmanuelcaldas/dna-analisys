@@ -1,12 +1,19 @@
 package br.com.magneto.controller;
 
-import br.com.magneto.DnaRequest;
+import br.com.magneto.dto.DnaRequest;
+import br.com.magneto.service.MutantService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class MutantController {
+
+    private MutantService mutantService;
+
+    public MutantController(final MutantService mutantService) {
+        this.mutantService = mutantService;
+    }
 
     String[] validStrings    = { "A", "T", "C", "G" };
 
@@ -19,9 +26,13 @@ public class MutantController {
     @PostMapping
     public ResponseEntity verifyIsMutant(@RequestBody DnaRequest dnaRequest){
         if (validPayload(dnaRequest)){
-            return new ResponseEntity<>(HttpStatus.OK);
+            if(mutantService.isMutant(dnaRequest.getDna())){
+                return new ResponseEntity<>(HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            }
         }else{
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 

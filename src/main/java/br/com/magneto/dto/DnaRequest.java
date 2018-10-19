@@ -1,4 +1,4 @@
-package br.com.magneto;
+package br.com.magneto.dto;
 
 public class DnaRequest {
     private String dna[];
