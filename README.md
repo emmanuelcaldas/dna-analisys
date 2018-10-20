@@ -1,4 +1,8 @@
 # dna-analisys
+endpoints: 
+GET - https://dna-analisys.herokuapp.com/hello
+POST - https://dna-analisys.herokuapp.com/mutant
+
 ## Maven Springboot Application + Spring Data MongoDB
 
 * Para executar esta aplicação, faça o clone deste repositório, <br/>
