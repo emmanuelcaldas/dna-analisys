@@ -1,0 +1,4 @@
+br/com/magneto/controller/MutantController.class
+br/com/magneto/service/MutantService.class
+br/com/magneto/Application.class
+br/com/magneto/dto/DnaRequest.class

@@ -23,7 +23,7 @@ public class MutantController {
     }
 
 
-    @PostMapping
+    @PostMapping("/mutant")
     public ResponseEntity verifyIsMutant(@RequestBody DnaRequest dnaRequest){
         if (validPayload(dnaRequest)){
             if(mutantService.isMutant(dnaRequest.getDna())){
