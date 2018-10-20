@@ -1,7 +1,9 @@
 package br.com.magneto.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+@JsonPropertyOrder({"countMutantDna","countHumanDna","ratio"})
 public class StatisticResponse {
 
     @JsonProperty(value = "count_mutant_dna")

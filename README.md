@@ -1,7 +1,14 @@
 # dna-analisys
 endpoints: 
-GET - https://dna-analisys.herokuapp.com/hello
-POST - https://dna-analisys.herokuapp.com/mutant
+* Análise de DNA
+POST - https://dna-analisys.herokuapp.com/mutant <br/>
+json body
+{
+“dna”:["ATGCGA","CAGTGC","TTATGT","AGAAGG","CCCCTA","TCACTG"]
+}
+
+* Estatísticas de dnas mutantes encontrados
+GET - https://dna-analisys.herokuapp.com/stats
 
 ## Maven Springboot Application + Spring Data MongoDB
 
@@ -15,6 +22,7 @@ POST - https://dna-analisys.herokuapp.com/mutant
 
 * Instale o mongodb seguindo o tutorial básico e reinicie a aplicação <br/>
 https://docs.mongodb.com/manual/administration/install-community/
-* Uma collection no banco será criada com o nome de mutant e as pesquisas serão
-gravadas nesta collection para a consulta do endpoint "/stats"
+* Altere a propriedade spring.data.mongodb.uri para mongo://hostDB:port/databaseName que vocẽ criar
+* Uma collection no banco será criada com o nome de verifiedDna e as análises de dna serão
+gravadas nesta collection para a consulta posterior no endpoint "/stats"
 
