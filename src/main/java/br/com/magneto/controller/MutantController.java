@@ -1,6 +1,7 @@
 package br.com.magneto.controller;
 
 import br.com.magneto.dto.DnaRequest;
+import br.com.magneto.dto.StatisticResponse;
 import br.com.magneto.service.MutantService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,11 @@ public class MutantController {
         }else{
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<StatisticResponse> getStats() {
+        return new ResponseEntity<>(mutantService.getStats(), HttpStatus.OK);
     }
 
     //TODO Create @Validator to dna req

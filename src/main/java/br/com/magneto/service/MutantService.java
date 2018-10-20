@@ -1,135 +1,75 @@
 package br.com.magneto.service;
 
+import br.com.magneto.domain.VerifiedDna;
+import br.com.magneto.dto.StatisticResponse;
+import br.com.magneto.repository.DnaRepository;
+import br.com.magneto.util.DnaUtil;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MutantService {
 
+    private DnaRepository dnaRepository;
+    private DnaUtil dnaUtil;
+
+    public MutantService(final DnaRepository dnaRepository, DnaUtil dnaUtil) {
+        this.dnaRepository = dnaRepository;
+        this.dnaUtil = dnaUtil;
+    }
+
     public boolean isMutant(String[] dna){
         final int n = dna.length;
+        int resultVerticalTest = 0, resultPriDiagonal = 0;
+        boolean isMutant = false;
 
-        String [][] matrix = this.getCharMatrix(dna, n);
+        String [][] matrix = dnaUtil.getCharMatrix(dna, n);
 
-        int resultHorizontalTest = this.findSequenceInLines(matrix,n);
-        if(resultHorizontalTest >= 2) return  true;
+        //verificacoes somente feitas enquanto não se encontram 2 linhas de sequencias iguais de dna
+        int resultHorizontalTest = dnaUtil.findSequenceInLines(matrix,n);
+        if(resultHorizontalTest >= 2) isMutant =  true;
 
-        int resultVerticalTest = this.findSequenceInCols(matrix,n);
-        if(resultHorizontalTest + resultVerticalTest >= 2) return  true;
+        if(!isMutant) {
+            resultVerticalTest = dnaUtil.findSequenceInCols(matrix, n);
+            if (resultHorizontalTest + resultVerticalTest >= 2) isMutant = true;
+        }
 
-        int resultPriDiagonal = this.findSequenceInPrimaryDiagonal(matrix,n);
-        if(resultPriDiagonal + resultHorizontalTest + resultVerticalTest >= 2) return  true;
+        if(!isMutant) {
+            resultPriDiagonal = dnaUtil.findSequenceInPrimaryDiagonal(matrix, n);
+            if (resultPriDiagonal + resultHorizontalTest + resultVerticalTest >= 2) isMutant = true;
+        }
 
-        int resultSecDiagonal = this.findSequenceInSecondaryDiagonal(matrix,n);
-        if(resultSecDiagonal + resultPriDiagonal + resultHorizontalTest + resultVerticalTest >= 2) return  true;
+        if(!isMutant) {
+            int resultSecDiagonal = dnaUtil.findSequenceInSecondaryDiagonal(matrix, n);
+            if (resultSecDiagonal + resultPriDiagonal + resultHorizontalTest + resultVerticalTest >= 2) isMutant = true;
+        }
 
-        //TODO save dna in mongodb
+        //salvando no mongo
+        saveInMongo(dna, isMutant);
 
-        return false;
+        return isMutant;
     }
 
-    private String [][] getCharMatrix(String[] dna, int n) {
-
-        String [][] matrix= new String[n][n];
-        int i = 0;
+    private void saveInMongo(String[] dna, boolean isMutant) {
+        StringBuilder dnaToRepo = new StringBuilder();
         for (String line : dna) {
-            String [] lineMatrix = line.split("");
-            int j = 0;
-            for (String ch : lineMatrix){
-                ch = ch.toUpperCase();
-                matrix[i][j]=ch;
-                j++;
-            }
-            i++;
+            dnaToRepo.append(line);
         }
-        return matrix;
+
+        VerifiedDna verifiedDna = new VerifiedDna();
+        verifiedDna.setDna(dnaToRepo.toString());
+        verifiedDna.setMutant(isMutant);
+        try {
+            dnaRepository.save(verifiedDna);
+        }catch (org.springframework.dao.DuplicateKeyException e){
+            System.out.println(e.getMessage());
+        }
     }
 
-
-    private int findSequenceInLines(String [][] matrix, int n){
-        int totalOcurrences = 0;
-        for(int i = 0; i<n; i++){
-            String lastStr = "", fixedStr = "";
-            int totalSequence = 1;
-            for(int j = 0; j<n; j++){
-                if(lastStr.equals(matrix[i][j])){
-                    if(totalSequence == 1) fixedStr = matrix[i][j];
-                    if(lastStr.equals(fixedStr)) {
-                        totalSequence++;
-                        if (totalSequence >= 4) {
-                            totalOcurrences++;
-                        }
-                    }else{
-                        totalSequence = 1;
-                    }
-                }
-                lastStr = matrix[i][j];
-            }
-        }
-        return totalOcurrences;
-    }
-
-    private int findSequenceInCols(String [][] matrix, int n){
-        int totalOcurrences = 0;
-        for(int j = 0; j<n; j++){
-            String lastStr = "", fixedStr = "";
-            int totalSequence = 1;
-            for(int i = 0; i<n; i++){
-                if(lastStr.equals(matrix[i][j])){
-                    if(totalSequence == 1) fixedStr = matrix[i][j];
-                    if(lastStr.equals(fixedStr)) {
-                        totalSequence++;
-                        if (totalSequence >= 4) {
-                            totalOcurrences++;
-                        }
-                    }else{
-                        totalSequence = 1;
-                    }
-                }
-                lastStr = matrix[i][j];
-            }
-        }
-        return totalOcurrences;
-    }
-
-    private int findSequenceInPrimaryDiagonal(String [][] matrix, int n){
-        int totalOcurrences = 0;
-        String lastStr = "", fixedStr = "";
-        int totalSequence = 1;
-        for(int i = 0; i<n; i++){
-            if(lastStr.equals(matrix[i][i])){
-                if(totalSequence == 1) fixedStr = matrix[i][i];
-                if(lastStr.equals(fixedStr)) {
-                    totalSequence++;
-                    if (totalSequence >= 4) {
-                        totalOcurrences++;
-                    }
-                }else{
-                    totalSequence = 1;
-                }
-            }
-            lastStr = matrix[i][i];
-        }
-        return totalOcurrences;
-    }
-
-    private int findSequenceInSecondaryDiagonal(String [][] matrix, int n){
-        int totalOcurrences = 0;
-        String lastStr = "", fixedStr = "";
-        int totalSequence = 1;
-        for(int i = 0, j = n-1; i<n; i++ , j--){
-            if(lastStr.equals(matrix[i][j])){
-                if(totalSequence == 1) fixedStr = matrix[i][j];
-                if(lastStr.equals(fixedStr)) {
-                    totalSequence++;
-                    if (totalSequence >= 4) {
-                        totalOcurrences++;
-                    }
-                }else{
-                    totalSequence = 1;
-                }
-            }
-            lastStr = matrix[i][j];
-        }
-        return totalOcurrences;
+    public StatisticResponse getStats(){
+        StatisticResponse stats = new StatisticResponse();
+        stats.setCountMutantDna(dnaRepository.countByIsMutant(true));
+        stats.setCountHumanDna(dnaRepository.countByIsMutant(false));
+        stats.setRatio(stats.getCountMutantDna() / stats.getCountHumanDna());
+        return   stats;
     }
 }
